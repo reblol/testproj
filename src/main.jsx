@@ -11,7 +11,7 @@ const workspaces = [
 const heroRoster = [
   ['Adam Warlock', 'Strategist'], ['Angela', 'Vanguard'], ['Black Cat', 'Duelist'], ['Black Panther', 'Duelist'],
   ['Black Widow', 'Duelist'], ['Blade', 'Duelist'], ['Captain America', 'Vanguard'], ['Cloak & Dagger', 'Strategist'],
-  ['Cyclops', 'Duelist'], ['Daredevil', 'Duelist'], ['Deadpool', 'Duelist / Strategist / Vanguard'], ['Doctor Strange', 'Vanguard'],
+  ['Cyclops', 'Duelist'], ['Daredevil', 'Duelist'], ['Deadpool', 'Duelist / Strategist / Vanguard'], ['Devil Dinosaur', 'Vanguard'], ['Doctor Strange', 'Vanguard'],
   ['Elsa Bloodstone', 'Duelist'], ['Emma Frost', 'Vanguard'], ['Gambit', 'Strategist'], ['Gorr the God Butcher', 'Duelist'],
   ['Groot', 'Vanguard'], ['Hawkeye', 'Duelist'], ['Hela', 'Duelist'], ['Hulk', 'Vanguard'], ['Human Torch', 'Duelist'],
   ['Invisible Woman', 'Strategist'], ['Iron Fist', 'Duelist'], ['Iron Man', 'Duelist'], ['Jeff the Land Shark', 'Strategist'],
@@ -21,7 +21,21 @@ const heroRoster = [
   ['Spider-Man', 'Duelist'], ['Squirrel Girl', 'Duelist'], ['Star-Lord', 'Duelist'], ['Storm', 'Duelist'], ['The Hood', 'Vanguard'],
   ['The Punisher', 'Duelist'], ['The Thing', 'Vanguard'], ['Thor', 'Vanguard'], ['Ultron', 'Strategist'], ['Venom', 'Vanguard'],
   ['White Fox', 'Strategist'], ['Winter Soldier', 'Duelist'], ['Wolverine', 'Duelist'],
-].map(([name, role]) => ({ name, role, tone: heroTone(role), asset: `lord-${slugify(name)}.png` }))
+].map(([name, role]) => ({ name, role, tone: heroTone(role), asset: heroAssetName(name) }))
+
+const heroAssetOverrides = {
+  'Adam Warlock': 'lord-adam.png',
+  'Cloak & Dagger': 'lord-cloak-dagger.png',
+  'Luna Snow': 'lord-luna.png',
+}
+
+function heroAssetName(name) {
+  return heroAssetOverrides[name] || `lord-${slugify(name)}.png`
+}
+
+function assetUrl(folder, file) {
+  return `${import.meta.env.BASE_URL}assets/${folder}/${file}`
+}
 
 function slugify(name) {
   return name.toLowerCase().replaceAll('&', 'and').replaceAll(' ', '-').replaceAll(/[^a-z0-9-]/g, '')
@@ -108,7 +122,7 @@ function DraftLanding() {
           <div className="picker-heading"><div><span className="eyebrow">{phase ? 'NOW SELECTING' : 'DRAFT STATUS'}</span><strong>{phase ? phase.label : 'DRAFT COMPLETE'}</strong></div><span className="phase-counter">{String(Math.min(activePhase + 1, phases.length)).padStart(2, '0')} / {String(phases.length).padStart(2, '0')}</span></div>
           <div className="hero-grid">
             <div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div>
-            {visibleHeroes.map((hero) => <button className={`hero-choice ${selectedHeroes.has(hero.name) || !phase ? 'used' : ''}`} draggable={!selectedHeroes.has(hero.name) && Boolean(phase)} onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.name)} key={hero.name} onClick={() => assignHero(hero)} disabled={selectedHeroes.has(hero.name) || !phase} type="button"><span className={`hero-token ${hero.tone}`}><img src={`/assets/heroes/${hero.asset}`} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
+            {visibleHeroes.map((hero) => <button className={`hero-choice ${selectedHeroes.has(hero.name) || !phase ? 'used' : ''}`} draggable={!selectedHeroes.has(hero.name) && Boolean(phase)} onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.name)} key={hero.name} onClick={() => assignHero(hero)} disabled={selectedHeroes.has(hero.name) || !phase} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
           </div>
           <div className="picker-hint">{phase ? `DRAG OR SELECT A HERO TO LOCK IN ${phase.type.toUpperCase()}` : 'RESET TO START A NEW DRAFT'}</div>
         </div>
@@ -240,25 +254,25 @@ function MapLanding() {
       <div className="map-layout">
         <aside className="map-rail">
           <div className="rail-label hero-rail-label">HERO BANK</div>
-          <div className="hero-palette">{heroRoster.map((hero) => <button className="palette-hero" draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.name)} key={hero.name} type="button" title={`Drag ${hero.name} onto the map`}><span className={`hero-token ${hero.tone}`}><img src={`/assets/heroes/${hero.asset}`} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><b>{hero.name}</b></button>)}</div>
+          <div className="hero-palette">{heroRoster.map((hero) => <button className="palette-hero" draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.name)} key={hero.name} type="button" title={`Drag ${hero.name} onto the map`}><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><b>{hero.name}</b></button>)}</div>
           <div className="rail-label">GAME MODE</div>
           <div className="mode-filters">{Object.keys(mapModes).map((mode) => <button className={activeMode === mode ? 'active' : ''} key={mode} onClick={() => changeMode(mode)} type="button">{mode}</button>)}</div>
           <div className="rail-label">{activeMode.toUpperCase()} MAPS</div>
-          {visibleMaps.map((map) => <button className={`map-choice ${activeMap === map.id ? 'active' : ''}`} key={map.id} onClick={() => changeMap(map.id)} type="button"><span className={`map-thumb ${map.id}`} style={{ backgroundImage: `url(/assets/maps/${map.asset})` }} /><span><b>{map.name}</b><small>{map.subtitle}</small></span></button>)}
+          {visibleMaps.map((map) => <button className={`map-choice ${activeMap === map.id ? 'active' : ''}`} key={map.id} onClick={() => changeMap(map.id)} type="button"><span className={`map-thumb ${map.id}`} style={{ backgroundImage: `url(${assetUrl('maps', map.asset)})` }} /><span><b>{map.name}</b><small>{map.subtitle}</small></span></button>)}
           <div className="rail-label stage-label">STAGES</div>
           <div className="stage-filters">{selectedMap.stages.map((stage, index) => <button className={activeStage === index ? 'active' : ''} key={stage} onClick={() => setActiveStage(index)} type="button"><b>{String(index + 1).padStart(2, '0')}</b>{stage}</button>)}</div>
           <div className="map-legend"><span className="legend-line" /> DRAWING<span className="legend-dot" /> HERO TOKEN</div>
         </aside>
         <div className="board-wrap">
           <div className="board-meta"><span><span className="signal-dot cyan-dot" /> {selectedMap.name} // {selectedMap.stages[activeStage]}</span><span>{tool === 'draw' ? 'DRAW MODE' : 'SELECT MODE'}</span></div>
-          <div className={`tactical-board ${activeMap}`} style={{ backgroundImage: `url(/assets/maps/${selectedMap.asset})` }} ref={boardRef} onDragOver={(event) => event.preventDefault()} onDrop={addHero} onPointerMove={moveHero} onPointerUp={() => setDragging(null)} onPointerLeave={() => setDragging(null)}>
+          <div className={`tactical-board ${activeMap}`} style={{ backgroundImage: `url(${assetUrl('maps', selectedMap.asset)})` }} ref={boardRef} onDragOver={(event) => event.preventDefault()} onDrop={addHero} onPointerMove={moveHero} onPointerUp={() => setDragging(null)} onPointerLeave={() => setDragging(null)}>
             <div className="board-grid" />
             <div className="map-terrain terrain-a" /><div className="map-terrain terrain-b" /><div className="map-terrain terrain-c" />
             <svg className={`draw-layer ${tool === 'draw' ? 'drawing' : ''}`} viewBox="0 0 100 100" preserveAspectRatio="none" onPointerDown={beginDraw} onPointerMove={continueDraw} onPointerUp={finishDraw}>
               {strokes.map((stroke, index) => <polyline key={index} points={points(stroke.points)} fill="none" stroke={stroke.color} strokeWidth="0.7" strokeLinecap="round" strokeLinejoin="round" />)}
               {currentStroke && <polyline points={points(currentStroke)} fill="none" stroke={penColor} strokeWidth="0.7" strokeLinecap="round" strokeLinejoin="round" />}
             </svg>
-            {heroes.map((hero) => <button className={`board-hero ${hero.tone}`} key={hero.id} style={{ left: `${hero.x}%`, top: `${hero.y}%` }} onPointerDown={(event) => startDrag(event, hero.id)} type="button" title={hero.name}><span><img src={`/assets/heroes/${hero.asset}`} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><small>{hero.name}</small></button>)}
+            {heroes.map((hero) => <button className={`board-hero ${hero.tone}`} key={hero.id} style={{ left: `${hero.x}%`, top: `${hero.y}%` }} onPointerDown={(event) => startDrag(event, hero.id)} type="button" title={hero.name}><span><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><small>{hero.name}</small></button>)}
             <div className="board-axis axis-x">A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;E</div>
             <div className="board-axis axis-y">1<br />2<br />3<br />4<br />5</div>
           </div>
