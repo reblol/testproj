@@ -133,7 +133,7 @@ function DraftLanding() {
 }
 
 function DraftSide({ title, accent, active, action, bans, saves, onDrop }) {
-  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className="action-slots">{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, title === 'YOUR TEAM' ? 'your' : 'enemy', type, slot)}><span>{item ? item.hero.slice(0, 2).toUpperCase() : String(slot + 1).padStart(2, '0')}</span>{item ? item.hero : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
+  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, title === 'YOUR TEAM' ? 'your' : 'enemy', type, slot)}><span>{item ? item.hero.slice(0, 2).toUpperCase() : String(slot + 1).padStart(2, '0')}</span>{item ? item.hero : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
   return <section className={`draft-side ${accent} ${active ? 'acting' : ''}`}><div className="side-heading"><span>{title}</span><i /></div><div className={`side-status ${active ? 'active' : ''}`}>{active ? `CURRENT TURN // ${action.toUpperCase()}` : 'WAITING'}</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')}</section>
 }
 
@@ -252,14 +252,14 @@ function MapLanding() {
       </div>
       <div className="map-layout">
         <aside className="map-rail">
+          <div className="rail-label hero-rail-label">HERO BANK</div>
+          <div className="hero-palette">{heroRoster.map((hero) => <button className="palette-hero" draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.name)} key={hero.name} type="button" title={`Drag ${hero.name} onto the map`}><span className={`hero-token ${hero.tone}`}><img src={`/assets/heroes/${hero.asset}`} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><b>{hero.name}</b></button>)}</div>
           <div className="rail-label">GAME MODE</div>
           <div className="mode-filters">{Object.keys(mapModes).map((mode) => <button className={activeMode === mode ? 'active' : ''} key={mode} onClick={() => changeMode(mode)} type="button">{mode}</button>)}</div>
           <div className="rail-label">{activeMode.toUpperCase()} MAPS</div>
           {visibleMaps.map((map) => <button className={`map-choice ${activeMap === map.id ? 'active' : ''}`} key={map.id} onClick={() => changeMap(map.id)} type="button"><span className={`map-thumb ${map.id}`} style={{ backgroundImage: `url(/assets/maps/${map.asset})` }} /><span><b>{map.name}</b><small>{map.subtitle}</small></span></button>)}
           <div className="rail-label stage-label">STAGES</div>
           <div className="stage-filters">{selectedMap.stages.map((stage, index) => <button className={activeStage === index ? 'active' : ''} key={stage} onClick={() => setActiveStage(index)} type="button"><b>{String(index + 1).padStart(2, '0')}</b>{stage}</button>)}</div>
-          <div className="rail-label hero-rail-label">HEROES</div>
-          <div className="hero-palette">{heroRoster.map((hero) => <button className="palette-hero" draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.name)} key={hero.name} type="button" title={`Drag ${hero.name} onto the map`}><span className={`hero-token ${hero.tone}`}><img src={`/assets/heroes/${hero.asset}`} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><b>{hero.name}</b></button>)}</div>
           <div className="map-legend"><span className="legend-line" /> DRAWING<span className="legend-dot" /> HERO TOKEN</div>
         </aside>
         <div className="board-wrap">
