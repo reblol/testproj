@@ -38,20 +38,25 @@ const draftFormats = {
     label: 'CHAMPIONSHIP S10',
     bans: 4,
     saves: 2,
+    yourOrder: ['ban:0', 'save:0', 'ban:1', 'ban:2', 'ban:3', 'save:1'],
+    enemyOrder: ['save:1', 'ban:3', 'ban:2', 'ban:1', 'save:0', 'ban:0'],
   },
   ignite: {
     label: 'IGNITE S10',
     bans: 5,
     saves: 2,
+    yourOrder: ['ban:0', 'save:0', 'ban:1', 'ban:2', 'ban:3', 'save:1', 'ban:4'],
+    enemyOrder: ['ban:4', 'ban:3', 'save:1', 'ban:2', 'save:0', 'ban:1', 'ban:0'],
   },
 }
 
 function createDraftPhases(draft) {
   const phases = []
-  for (let index = 0; index < Math.max(draft.bans, draft.saves); index += 1) {
-    for (const team of ['your', 'enemy']) {
-      if (index < draft.bans) phases.push({ label: `${team === 'your' ? 'YOUR' : 'ENEMY'} BAN`, team, type: 'ban', slot: index })
-      if (index < draft.saves) phases.push({ label: `${team === 'your' ? 'YOUR' : 'ENEMY'} SAVE`, team, type: 'save', slot: index })
+  const orders = [['your', draft.yourOrder], ['enemy', draft.enemyOrder]]
+  for (let index = 0; index < orders[0][1].length; index += 1) {
+    for (const [team, order] of orders) {
+      const [type, slot] = order[index].split(':')
+      phases.push({ label: `${team === 'your' ? 'YOUR' : 'ENEMY'} ${type === 'ban' ? 'BAN' : 'SAVE'}`, team, type, slot: Number(slot) })
     }
   }
   return phases
@@ -108,16 +113,8 @@ function DraftLanding() {
         </div>
       </div>
 
-      <div className="phase-strip" style={{ gridTemplateColumns: `repeat(${phases.length}, minmax(88px, 1fr))` }}>
-        {phases.map((currentPhase, index) => (
-          <div className={`phase-step ${index === activePhase ? 'current' : ''} ${index < actions.length ? 'complete' : ''}`} key={`${currentPhase.label}-${currentPhase.slot}`}>
-            <b>{String(index + 1).padStart(2, '0')}</b><span>{currentPhase.type === 'ban' ? <Ban size={12} /> : <Check size={12} />}{currentPhase.label}</span><i />
-          </div>
-        ))}
-      </div>
-
       <div className="draft-columns">
-        <DraftSide title="YOUR TEAM" accent="red" active={phase?.team === 'your'} action={phase?.type} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
+        <DraftSide title="YOUR TEAM" accent="red" team="your" order={draft.yourOrder} active={phase?.team === 'your'} action={phase?.type} activePhase={phase} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
         <div className="picker-panel">
           <div className="picker-heading"><div><span className="eyebrow">{phase ? 'NOW SELECTING' : 'DRAFT STATUS'}</span><strong>{phase ? phase.label : 'DRAFT COMPLETE'}</strong></div><span className="phase-counter">{String(Math.min(activePhase + 1, phases.length)).padStart(2, '0')} / {String(phases.length).padStart(2, '0')}</span></div>
           <div className="hero-grid">
@@ -126,15 +123,16 @@ function DraftLanding() {
           </div>
           <div className="picker-hint">{phase ? `DRAG OR SELECT A HERO TO LOCK IN ${phase.type.toUpperCase()}` : 'RESET TO START A NEW DRAFT'}</div>
         </div>
-        <DraftSide title="ENEMY TEAM" accent="cyan" active={phase?.team === 'enemy'} action={phase?.type} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
+        <DraftSide title="ENEMY TEAM" accent="cyan" team="enemy" order={draft.enemyOrder} active={phase?.team === 'enemy'} action={phase?.type} activePhase={phase} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
       </div>
     </section>
   )
 }
 
-function DraftSide({ title, accent, active, action, bans, saves, onDrop }) {
+function DraftSide({ title, accent, team, order, active, action, activePhase, bans, saves, onDrop }) {
   const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, title === 'YOUR TEAM' ? 'your' : 'enemy', type, slot)}><span>{item ? item.hero.slice(0, 2).toUpperCase() : String(slot + 1).padStart(2, '0')}</span>{item ? item.hero : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
-  return <section className={`draft-side ${accent} ${active ? 'acting' : ''}`}><div className="side-heading"><span>{title}</span><i /></div><div className={`side-status ${active ? 'active' : ''}`}>{active ? `CURRENT TURN // ${action.toUpperCase()}` : 'WAITING'}</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')}</section>
+  const orderRail = <div className="team-order">{order.map((entry, index) => { const [type, slot] = entry.split(':'); const isCurrent = active && activePhase?.team === team && activePhase?.type === type && activePhase?.slot === Number(slot); return <div className={`order-step ${isCurrent ? 'current' : ''} ${index < order.findIndex((item) => item === `${activePhase?.type}:${activePhase?.slot}`) ? 'complete' : ''}`} key={`${team}-${entry}`}><b>{index + 1}</b><span>{type === 'ban' ? 'BAN' : 'SAVE'} {Number(slot) + 1}</span></div> })}</div>
+  return <section className={`draft-side ${accent} ${active ? 'acting' : ''}`}><div className="side-heading"><span>{title}</span><i /></div>{orderRail}<div className={`side-status ${active ? 'active' : ''}`}>{active ? `CURRENT TURN // ${action.toUpperCase()}` : 'WAITING'}</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')}</section>
 }
 
 const mapModes = {

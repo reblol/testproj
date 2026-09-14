@@ -66,6 +66,11 @@ button { font: inherit; }
 .side-heading { display: flex; align-items: center; justify-content: space-between; padding-bottom: 15px; border-bottom: 1px solid rgba(223, 231, 244, .11); color: #dfe5ef; font-size: 11px; letter-spacing: .13em; }
 .side-heading i { width: 7px; height: 7px; border-radius: 50%; background: #ef4b3f; box-shadow: 0 0 11px #ef4b3f; }
 .draft-side.cyan .side-heading i { background: #56bfd2; box-shadow: 0 0 11px #56bfd2; }
+.team-order { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin-top: 13px; }
+.order-step { min-height: 38px; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 4px 2px; border: 1px dashed rgba(223, 231, 244, .2); color: #65738b; text-align: center; }
+.order-step b { color: #46526a; font-size: 8px; }.order-step span { font-size: 7px; letter-spacing: .03em; white-space: nowrap; }
+.order-step.current { border-color: #ef4b3f; color: #f4f6fb; background: rgba(239, 75, 63, .13); }.draft-side.cyan .order-step.current { border-color: #56bfd2; background: rgba(86, 191, 210, .13); }
+.order-step.current b, .order-step.complete b { color: #ef4b3f; }.draft-side.cyan .order-step.current b, .draft-side.cyan .order-step.complete b { color: #56bfd2; }
 .side-status { margin-top: 11px; color: #46526a; font-size: 8px; letter-spacing: .1em; }
 .side-status.active { color: #ef4b3f; }.draft-side.cyan .side-status.active { color: #56bfd2; }
 .side-group { margin-top: 18px; }
