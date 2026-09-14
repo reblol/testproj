@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { createRoot } from 'react-dom/client'
 import { Ban, Check, ChevronDown, Crosshair, Eraser, LayoutGrid, Map, MousePointer2, Pencil, Radio, RotateCcw, Shield, Swords, Trash2 } from 'lucide-react'
 import './styles.css'
 
@@ -267,3 +268,5 @@ function App() {
 }
 
 export default App
+
+createRoot(document.getElementById('root')).render(<App />)
