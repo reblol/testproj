@@ -43,6 +43,7 @@ const draftFormats = {
       ['enemy', 'ban'], ['enemy', 'save'],
       ['your', 'save'], ['your', 'ban'],
       ['enemy', 'ban'],
+      ['enemy', 'ban'],
       ['your', 'ban'],
     ],
   },
