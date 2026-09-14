@@ -8,6 +8,12 @@ const workspaces = [
   { id: 'map', label: 'Map Planner', icon: Map },
 ]
 
+const heroAssetOverrides = {
+  'Adam Warlock': 'lord-adam.png',
+  'Cloak & Dagger': 'lord-cloak-dagger.png',
+  'Luna Snow': 'lord-luna.png',
+}
+
 const heroRoster = [
   ['Adam Warlock', 'Strategist'], ['Angela', 'Vanguard'], ['Black Cat', 'Duelist'], ['Black Panther', 'Duelist'],
   ['Black Widow', 'Duelist'], ['Blade', 'Duelist'], ['Captain America', 'Vanguard'], ['Cloak & Dagger', 'Strategist'],
@@ -22,12 +28,6 @@ const heroRoster = [
   ['The Punisher', 'Duelist'], ['The Thing', 'Vanguard'], ['Thor', 'Vanguard'], ['Ultron', 'Strategist'], ['Venom', 'Vanguard'],
   ['White Fox', 'Strategist'], ['Winter Soldier', 'Duelist'], ['Wolverine', 'Duelist'],
 ].map(([name, role]) => ({ name, role, tone: heroTone(role), asset: heroAssetName(name) }))
-
-const heroAssetOverrides = {
-  'Adam Warlock': 'lord-adam.png',
-  'Cloak & Dagger': 'lord-cloak-dagger.png',
-  'Luna Snow': 'lord-luna.png',
-}
 
 function heroAssetName(name) {
   return heroAssetOverrides[name] || `lord-${slugify(name)}.png`
