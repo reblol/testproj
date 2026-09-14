@@ -1,5 +1,11 @@
 # Map assets
 
-Place competitive top-down map backgrounds here as optimized WebP files. The current Season 10-ready planner expects `tokyo-2099.webp`, `wakanda.webp`, `klyntar.webp`, `yggsgard.webp`, `spider-islands.webp`, `midtown.webp`, `hall-of-djalia.webp`, and `empire-of-eternal-night.webp`.
+Place competitive top-down map backgrounds here as optimized WebP files. The planner now groups the complete competitive catalog by mode:
+
+- Domination: Hellfire Gala: Krakoa, Hydra Charteris Base: Hell's Heaven, Birnin T'Challa, Klyntar: Celestial Husk, Yggsgard: Royal Palace
+- Convoy: Empire of Eternal Night: Midtown, Hellfire Gala: Arakko, Museum of Contemplation, Thebes, Tokyo 2099: Spider-Islands, Yggsgard: Yggdrasill Path
+- Convergence: Empire of Eternal Night: Central Park, Hall of Djalia, K'un-Lun: Heart of Heaven, Klyntar: Symbiotic Surface, Lower Manhattan, Tokyo 2099: Shin-Shibuya
+
+Use the lowercase `.webp` ids defined in `src/main.jsx` for filenames. Missing images fall back to the tactical surface.
 
 Missing files automatically fall back to the tactical terrain placeholders already visible in the app.
