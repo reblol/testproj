@@ -43,6 +43,7 @@ button { font: inherit; }
 .draft-toolbar h2 { margin: 12px 0 0; color: #f4f6fb; font: 700 clamp(42px, 5vw, 66px)/.9 'Barlow Condensed', sans-serif; letter-spacing: .02em; text-transform: uppercase; }
 .draft-toolbar h2 span { color: #ef4b3f; }
 .toolbar-actions { display: flex; align-items: center; gap: 9px; }
+.format-badge { padding: 12px 13px; border: 1px solid rgba(239, 75, 63, .4); color: #ef4b3f; font-size: 9px; letter-spacing: .12em; }
 .format-select { position: relative; display: flex; align-items: center; gap: 9px; min-width: 180px; padding: 12px 13px; border: 1px solid rgba(223, 231, 244, .19); color: #9da9bc; font-size: 9px; letter-spacing: .12em; }
 .format-select svg { position: absolute; right: 11px; pointer-events: none; }
 .format-select select { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Ban, Check, ChevronDown, Crosshair, Eraser, LayoutGrid, Map, MousePointer2, Pencil, Radio, RotateCcw, Shield, Swords, Trash2 } from 'lucide-react'
+import { Ban, Check, Crosshair, Eraser, LayoutGrid, Map, MousePointer2, Pencil, Radio, RotateCcw, Shield, Swords, Trash2 } from 'lucide-react'
 import './styles.css'
 
 const workspaces = [
@@ -34,36 +34,31 @@ function heroTone(role) {
 }
 
 const draftFormats = {
-  championship: {
-    label: 'CHAMPIONSHIP S10',
-    bans: 4,
-    saves: 2,
-    yourOrder: ['ban:0', 'save:0', 'ban:1', 'ban:2', 'ban:3', 'save:1'],
-    enemyOrder: ['save:1', 'ban:3', 'ban:2', 'ban:1', 'save:0', 'ban:0'],
-  },
-  ignite: {
-    label: 'IGNITE S10',
-    bans: 5,
-    saves: 2,
-    yourOrder: ['ban:0', 'save:0', 'ban:1', 'ban:2', 'ban:3', 'save:1', 'ban:4'],
-    enemyOrder: ['ban:4', 'ban:3', 'save:1', 'ban:2', 'save:0', 'ban:1', 'ban:0'],
+  mrc: {
+    label: 'MRC SEASON 10',
+    phases: [
+      ['your', 'ban'],
+      ['enemy', 'ban'], ['enemy', 'save'],
+      ['your', 'save'], ['your', 'ban'],
+      ['enemy', 'ban'], ['enemy', 'save'],
+      ['your', 'save'], ['your', 'ban'],
+      ['enemy', 'ban'],
+      ['your', 'ban'],
+    ],
   },
 }
 
 function createDraftPhases(draft) {
-  const phases = []
-  const orders = [['your', draft.yourOrder], ['enemy', draft.enemyOrder]]
-  for (let index = 0; index < orders[0][1].length; index += 1) {
-    for (const [team, order] of orders) {
-      const [type, slot] = order[index].split(':')
-      phases.push({ label: `${team === 'your' ? 'YOUR' : 'ENEMY'} ${type === 'ban' ? 'BAN' : 'SAVE'}`, team, type, slot: Number(slot) })
-    }
-  }
-  return phases
+  const slots = { your: { ban: 0, save: 0 }, enemy: { ban: 0, save: 0 } }
+  return draft.phases.map(([team, type], index) => {
+    const slot = slots[team][type]
+    slots[team][type] += 1
+    return { label: `${team === 'your' ? 'YOUR' : 'ENEMY'} ${type === 'ban' ? 'BAN' : 'SAVE'}`, team, type, slot, index }
+  })
 }
 
 function DraftLanding() {
-  const [format, setFormat] = useState('championship')
+  const [format] = useState('mrc')
   const [activePhase, setActivePhase] = useState(0)
   const [actions, setActions] = useState([])
   const [roleFilter, setRoleFilter] = useState('All')
@@ -73,12 +68,6 @@ function DraftLanding() {
   const selectedHeroes = new Set(actions.map((action) => action.hero))
 
   const resetDraft = () => {
-    setActivePhase(0)
-    setActions([])
-  }
-
-  const changeFormat = (nextFormat) => {
-    setFormat(nextFormat)
     setActivePhase(0)
     setActions([])
   }
@@ -96,7 +85,8 @@ function DraftLanding() {
     assignHero(hero, team, type, slot)
   }
 
-  const teamActions = (team, type) => Array.from({ length: type === 'ban' ? draft.bans : draft.saves }, (_, slot) => actions.find((action) => action.team === team && action.type === type && action.slot === slot))
+  const teamActions = (team, type) => Array.from({ length: Math.max(...phases.filter((item) => item.team === team && item.type === type).map((item) => item.slot), -1) + 1 }, (_, slot) => actions.find((action) => action.team === team && action.type === type && action.slot === slot))
+  const teamOrder = (team) => phases.filter((item) => item.team === team).map((item) => `${item.type}:${item.slot}`)
   const visibleHeroes = roleFilter === 'All' ? heroRoster : heroRoster.filter((hero) => hero.role.includes(roleFilter))
 
   return (
@@ -106,15 +96,13 @@ function DraftLanding() {
           <h2>Draft <span>planner</span></h2>
         </div>
         <div className="toolbar-actions">
-          <label className="format-select">FORMAT <ChevronDown size={14} /><select value={format} onChange={(event) => changeFormat(event.target.value)} aria-label="Draft format">
-            {Object.entries(draftFormats).map(([id, item]) => <option value={id} key={id}>{item.label}</option>)}
-          </select></label>
+          <span className="format-badge">MRC SEASON 10</span>
           <button className="icon-button" onClick={resetDraft} type="button" title="Reset draft"><RotateCcw size={16} /></button>
         </div>
       </div>
 
       <div className="draft-columns">
-        <DraftSide title="YOUR TEAM" accent="red" team="your" order={draft.yourOrder} active={phase?.team === 'your'} action={phase?.type} activePhase={phase} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
+        <DraftSide title="YOUR TEAM" accent="red" team="your" order={teamOrder('your')} active={phase?.team === 'your'} action={phase?.type} activePhase={phase} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
         <div className="picker-panel">
           <div className="picker-heading"><div><span className="eyebrow">{phase ? 'NOW SELECTING' : 'DRAFT STATUS'}</span><strong>{phase ? phase.label : 'DRAFT COMPLETE'}</strong></div><span className="phase-counter">{String(Math.min(activePhase + 1, phases.length)).padStart(2, '0')} / {String(phases.length).padStart(2, '0')}</span></div>
           <div className="hero-grid">
@@ -123,7 +111,7 @@ function DraftLanding() {
           </div>
           <div className="picker-hint">{phase ? `DRAG OR SELECT A HERO TO LOCK IN ${phase.type.toUpperCase()}` : 'RESET TO START A NEW DRAFT'}</div>
         </div>
-        <DraftSide title="ENEMY TEAM" accent="cyan" team="enemy" order={draft.enemyOrder} active={phase?.team === 'enemy'} action={phase?.type} activePhase={phase} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
+        <DraftSide title="ENEMY TEAM" accent="cyan" team="enemy" order={teamOrder('enemy')} active={phase?.team === 'enemy'} action={phase?.type} activePhase={phase} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
       </div>
     </section>
   )
