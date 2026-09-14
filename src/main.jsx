@@ -21,7 +21,7 @@ const heroRoster = [
   ['Spider-Man', 'Duelist'], ['Squirrel Girl', 'Duelist'], ['Star-Lord', 'Duelist'], ['Storm', 'Duelist'], ['The Hood', 'Vanguard'],
   ['The Punisher', 'Duelist'], ['The Thing', 'Vanguard'], ['Thor', 'Vanguard'], ['Ultron', 'Strategist'], ['Venom', 'Vanguard'],
   ['White Fox', 'Strategist'], ['Winter Soldier', 'Duelist'], ['Wolverine', 'Duelist'],
-].map(([name, role]) => ({ name, role, tone: heroTone(role), asset: `${slugify(name)}.webp` }))
+].map(([name, role]) => ({ name, role, tone: heroTone(role), asset: `lord-${slugify(name)}.png` }))
 
 function slugify(name) {
   return name.toLowerCase().replaceAll('&', 'and').replaceAll(' ', '-').replaceAll(/[^a-z0-9-]/g, '')
