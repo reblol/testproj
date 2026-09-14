@@ -8,4 +8,6 @@ Place competitive top-down map backgrounds here as optimized WebP files. The pla
 
 Use the lowercase `.webp` ids defined in `src/main.jsx` for filenames. Missing images fall back to the tactical surface.
 
+Domination entries also expose three planner stages each. Stage labels are data-only until stage-specific images are provided; the parent map image remains the fallback board background.
+
 Missing files automatically fall back to the tactical terrain placeholders already visible in the app.

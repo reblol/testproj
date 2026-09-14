@@ -36,23 +36,25 @@ function heroTone(role) {
 const draftFormats = {
   championship: {
     label: 'CHAMPIONSHIP S10',
-    phases: [
-      ['YOUR BAN', 'your', 'ban'], ['ENEMY BAN', 'enemy', 'ban'],
-      ['YOUR PICK', 'your', 'pick'], ['ENEMY PICK', 'enemy', 'pick'],
-      ['YOUR PICK', 'your', 'pick'], ['ENEMY PICK', 'enemy', 'pick'],
-      ['YOUR BAN', 'your', 'ban'], ['ENEMY BAN', 'enemy', 'ban'],
-    ],
+    bans: 4,
+    saves: 2,
   },
   ignite: {
     label: 'IGNITE S10',
-    phases: [
-      ['YOUR BAN', 'your', 'ban'], ['ENEMY BAN', 'enemy', 'ban'],
-      ['YOUR PICK', 'your', 'pick'], ['ENEMY PICK', 'enemy', 'pick'],
-      ['ENEMY PICK', 'enemy', 'pick'], ['YOUR PICK', 'your', 'pick'],
-      ['YOUR BAN', 'your', 'ban'], ['ENEMY BAN', 'enemy', 'ban'],
-      ['YOUR PICK', 'your', 'pick'], ['ENEMY PICK', 'enemy', 'pick'],
-    ],
+    bans: 5,
+    saves: 2,
   },
+}
+
+function createDraftPhases(draft) {
+  const phases = []
+  for (let index = 0; index < Math.max(draft.bans, draft.saves); index += 1) {
+    for (const team of ['your', 'enemy']) {
+      if (index < draft.bans) phases.push({ label: `${team === 'your' ? 'YOUR' : 'ENEMY'} BAN`, team, type: 'ban', slot: index })
+      if (index < draft.saves) phases.push({ label: `${team === 'your' ? 'YOUR' : 'ENEMY'} SAVE`, team, type: 'save', slot: index })
+    }
+  }
+  return phases
 }
 
 function DraftLanding() {
@@ -61,7 +63,8 @@ function DraftLanding() {
   const [actions, setActions] = useState([])
   const [roleFilter, setRoleFilter] = useState('All')
   const draft = draftFormats[format]
-  const phase = draft.phases[activePhase]
+  const phases = createDraftPhases(draft)
+  const phase = phases[activePhase]
   const selectedHeroes = new Set(actions.map((action) => action.hero))
 
   const resetDraft = () => {
@@ -75,13 +78,20 @@ function DraftLanding() {
     setActions([])
   }
 
-  const selectHero = (hero) => {
-    if (!phase || actions.length !== activePhase || selectedHeroes.has(hero.name)) return
-    setActions([...actions, { hero: hero.name, team: phase[1], type: phase[2] }])
+  const assignHero = (hero, team = phase?.team, type = phase?.type, slot = phase?.slot) => {
+    if (!hero || !phase || actions.length !== activePhase || team !== phase.team || type !== phase.type) return
+    if (selectedHeroes.has(hero.name) || actions.some((action) => action.team === team && action.type === type && action.slot === slot)) return
+    setActions([...actions, { hero: hero.name, team, type, slot }])
     setActivePhase(activePhase + 1)
   }
 
-  const teamActions = (team, type) => actions.filter((action) => action.team === team && action.type === type)
+  const dropHero = (event, team, type, slot) => {
+    event.preventDefault()
+    const hero = heroRoster.find((item) => item.name === event.dataTransfer.getData('text/plain'))
+    assignHero(hero, team, type, slot)
+  }
+
+  const teamActions = (team, type) => Array.from({ length: type === 'ban' ? draft.bans : draft.saves }, (_, slot) => actions.find((action) => action.team === team && action.type === type && action.slot === slot))
   const visibleHeroes = roleFilter === 'All' ? heroRoster : heroRoster.filter((hero) => hero.role.includes(roleFilter))
 
   return (
@@ -98,32 +108,33 @@ function DraftLanding() {
         </div>
       </div>
 
-      <div className="phase-strip" style={{ gridTemplateColumns: `repeat(${draft.phases.length}, minmax(88px, 1fr))` }}>
-        {draft.phases.map(([label, team, type], index) => (
-          <div className={`phase-step ${index === activePhase ? 'current' : ''} ${index < actions.length ? 'complete' : ''}`} key={`${label}-${index}`}>
-            <b>{String(index + 1).padStart(2, '0')}</b><span>{type === 'ban' ? <Ban size={12} /> : <Check size={12} />}{label}</span><i />
+      <div className="phase-strip" style={{ gridTemplateColumns: `repeat(${phases.length}, minmax(88px, 1fr))` }}>
+        {phases.map((currentPhase, index) => (
+          <div className={`phase-step ${index === activePhase ? 'current' : ''} ${index < actions.length ? 'complete' : ''}`} key={`${currentPhase.label}-${currentPhase.slot}`}>
+            <b>{String(index + 1).padStart(2, '0')}</b><span>{currentPhase.type === 'ban' ? <Ban size={12} /> : <Check size={12} />}{currentPhase.label}</span><i />
           </div>
         ))}
       </div>
 
       <div className="draft-columns">
-        <DraftSide title="YOUR TEAM" accent="red" active={phase?.[1] === 'your'} action={phase?.[2]} bans={teamActions('your', 'ban')} picks={teamActions('your', 'pick')} />
+        <DraftSide title="YOUR TEAM" accent="red" active={phase?.team === 'your'} action={phase?.type} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
         <div className="picker-panel">
-          <div className="picker-heading"><div><span className="eyebrow">{phase ? 'NOW SELECTING' : 'DRAFT STATUS'}</span><strong>{phase ? phase[0] : 'DRAFT COMPLETE'}</strong></div><span className="phase-counter">{String(Math.min(activePhase + 1, draft.phases.length)).padStart(2, '0')} / {String(draft.phases.length).padStart(2, '0')}</span></div>
+          <div className="picker-heading"><div><span className="eyebrow">{phase ? 'NOW SELECTING' : 'DRAFT STATUS'}</span><strong>{phase ? phase.label : 'DRAFT COMPLETE'}</strong></div><span className="phase-counter">{String(Math.min(activePhase + 1, phases.length)).padStart(2, '0')} / {String(phases.length).padStart(2, '0')}</span></div>
           <div className="hero-grid">
             <div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div>
-            {visibleHeroes.map((hero) => <button className={`hero-choice ${selectedHeroes.has(hero.name) || !phase ? 'used' : ''}`} key={hero.name} onClick={() => selectHero(hero)} disabled={selectedHeroes.has(hero.name) || !phase} type="button"><span className={`hero-token ${hero.tone}`}><img src={`/assets/heroes/${hero.asset}`} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
+            {visibleHeroes.map((hero) => <button className={`hero-choice ${selectedHeroes.has(hero.name) || !phase ? 'used' : ''}`} draggable={!selectedHeroes.has(hero.name) && Boolean(phase)} onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.name)} key={hero.name} onClick={() => assignHero(hero)} disabled={selectedHeroes.has(hero.name) || !phase} type="button"><span className={`hero-token ${hero.tone}`}><img src={`/assets/heroes/${hero.asset}`} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
           </div>
-          <div className="picker-hint">{phase ? `SELECT A HERO TO LOCK IN ${phase[2].toUpperCase()}` : 'RESET TO START A NEW DRAFT'}</div>
+          <div className="picker-hint">{phase ? `DRAG OR SELECT A HERO TO LOCK IN ${phase.type.toUpperCase()}` : 'RESET TO START A NEW DRAFT'}</div>
         </div>
-        <DraftSide title="ENEMY TEAM" accent="cyan" active={phase?.[1] === 'enemy'} action={phase?.[2]} bans={teamActions('enemy', 'ban')} picks={teamActions('enemy', 'pick')} />
+        <DraftSide title="ENEMY TEAM" accent="cyan" active={phase?.team === 'enemy'} action={phase?.type} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
       </div>
     </section>
   )
 }
 
-function DraftSide({ title, accent, active, action, bans, picks }) {
-  return <section className={`draft-side ${accent} ${active ? 'acting' : ''}`}><div className="side-heading"><span>{title}</span><i /></div><div className={`side-status ${active ? 'active' : ''}`}>{active ? `CURRENT TURN // ${action.toUpperCase()}` : 'WAITING'}</div><div className="side-group"><label><Ban size={13} /> BANS</label><div className="action-slots">{bans.map((item) => <div className="action-chip" key={item.hero}><span>{item.hero.slice(0, 2).toUpperCase()}</span>{item.hero}</div>)}{!bans.length && <div className="empty-slot">OPEN</div>}</div></div><div className="side-group"><label><Check size={13} /> PICKS</label><div className="action-slots picks">{picks.map((item) => <div className="action-chip" key={item.hero}><span>{item.hero.slice(0, 2).toUpperCase()}</span>{item.hero}</div>)}{!picks.length && <div className="empty-slot">OPEN</div>}</div></div></section>
+function DraftSide({ title, accent, active, action, bans, saves, onDrop }) {
+  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className="action-slots">{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, title === 'YOUR TEAM' ? 'your' : 'enemy', type, slot)}><span>{item ? item.hero.slice(0, 2).toUpperCase() : String(slot + 1).padStart(2, '0')}</span>{item ? item.hero : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
+  return <section className={`draft-side ${accent} ${active ? 'acting' : ''}`}><div className="side-heading"><span>{title}</span><i /></div><div className={`side-status ${active ? 'active' : ''}`}>{active ? `CURRENT TURN // ${action.toUpperCase()}` : 'WAITING'}</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')}</section>
 }
 
 const mapModes = {
@@ -143,9 +154,20 @@ const mapModes = {
 
 const mapPresets = Object.entries(mapModes).flatMap(([mode, maps]) => maps.map(([name, id]) => ({ id, name, mode, subtitle: mode.toUpperCase(), asset: `${id}.webp` })))
 
+const mapStages = {
+  'hellfire-gala-krakoa': ['Cradle', 'Grove', 'Throne Room'],
+  'hydra-charteris-base-hells-heaven': ['Hell\'s Heaven', 'Hydra Base', 'Charteris Core'],
+  'birnin-tchalla': ['Birnin T\'Challa', 'Warrior Falls', 'Royal Court'],
+  'klyntar-celestial-husk': ['Celestial Husk', 'Symbiote Chamber', 'Knull\'s Maw'],
+  yggsgard: ['Royal Palace', 'Bifrost Garden', 'Throne Hall'],
+}
+
+mapPresets.forEach((map) => { map.stages = mapStages[map.id] || ['Main Stage'] })
+
 function MapLanding() {
   const [activeMode, setActiveMode] = useState('domination')
   const [activeMap, setActiveMap] = useState(mapModes.domination[0][1])
+  const [activeStage, setActiveStage] = useState(0)
   const [tool, setTool] = useState('select')
   const [heroes, setHeroes] = useState([])
   const [strokes, setStrokes] = useState([])
@@ -208,6 +230,12 @@ function MapLanding() {
   const changeMode = (mode) => {
     setActiveMode(mode)
     setActiveMap(mapModes[mode][0][1])
+    setActiveStage(0)
+  }
+
+  const changeMap = (mapId) => {
+    setActiveMap(mapId)
+    setActiveStage(0)
   }
 
   return (
@@ -227,13 +255,15 @@ function MapLanding() {
           <div className="rail-label">GAME MODE</div>
           <div className="mode-filters">{Object.keys(mapModes).map((mode) => <button className={activeMode === mode ? 'active' : ''} key={mode} onClick={() => changeMode(mode)} type="button">{mode}</button>)}</div>
           <div className="rail-label">{activeMode.toUpperCase()} MAPS</div>
-          {visibleMaps.map((map) => <button className={`map-choice ${activeMap === map.id ? 'active' : ''}`} key={map.id} onClick={() => setActiveMap(map.id)} type="button"><span className={`map-thumb ${map.id}`} style={{ backgroundImage: `url(/assets/maps/${map.asset})` }} /><span><b>{map.name}</b><small>{map.subtitle}</small></span></button>)}
+          {visibleMaps.map((map) => <button className={`map-choice ${activeMap === map.id ? 'active' : ''}`} key={map.id} onClick={() => changeMap(map.id)} type="button"><span className={`map-thumb ${map.id}`} style={{ backgroundImage: `url(/assets/maps/${map.asset})` }} /><span><b>{map.name}</b><small>{map.subtitle}</small></span></button>)}
+          <div className="rail-label stage-label">STAGES</div>
+          <div className="stage-filters">{selectedMap.stages.map((stage, index) => <button className={activeStage === index ? 'active' : ''} key={stage} onClick={() => setActiveStage(index)} type="button"><b>{String(index + 1).padStart(2, '0')}</b>{stage}</button>)}</div>
           <div className="rail-label hero-rail-label">HEROES</div>
           <div className="hero-palette">{heroRoster.map((hero) => <button className="palette-hero" draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.name)} key={hero.name} type="button" title={`Drag ${hero.name} onto the map`}><span className={`hero-token ${hero.tone}`}><img src={`/assets/heroes/${hero.asset}`} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><b>{hero.name}</b></button>)}</div>
           <div className="map-legend"><span className="legend-line" /> DRAWING<span className="legend-dot" /> HERO TOKEN</div>
         </aside>
         <div className="board-wrap">
-          <div className="board-meta"><span><span className="signal-dot cyan-dot" /> {selectedMap.name}</span><span>{tool === 'draw' ? 'DRAW MODE' : 'SELECT MODE'}</span></div>
+          <div className="board-meta"><span><span className="signal-dot cyan-dot" /> {selectedMap.name} // {selectedMap.stages[activeStage]}</span><span>{tool === 'draw' ? 'DRAW MODE' : 'SELECT MODE'}</span></div>
           <div className={`tactical-board ${activeMap}`} style={{ backgroundImage: `url(/assets/maps/${selectedMap.asset})` }} ref={boardRef} onDragOver={(event) => event.preventDefault()} onDrop={addHero} onPointerMove={moveHero} onPointerUp={() => setDragging(null)} onPointerLeave={() => setDragging(null)}>
             <div className="board-grid" />
             <div className="map-terrain terrain-a" /><div className="map-terrain terrain-b" /><div className="map-terrain terrain-c" />

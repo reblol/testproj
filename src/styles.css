@@ -10,6 +10,8 @@
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; background: #101727; }
 button { font: inherit; }
+.drop-slot { cursor: copy; }
+.drop-slot:not(.filled):hover { border-color: #ef4b3f; background: rgba(239, 75, 63, .1); }
 
 .app-shell { min-height: 100vh; overflow: hidden; background: linear-gradient(135deg, #101727 0%, #131d31 58%, #19243b 100%); }
 .topbar { height: 78px; display: flex; align-items: center; justify-content: space-between; padding: 0 4.5vw; border-bottom: 1px solid rgba(223, 231, 244, .15); background: rgba(12, 19, 34, .48); }
@@ -112,6 +114,11 @@ button { font: inherit; }
 .map-rail { padding-right: 17px; border-right: 1px solid rgba(223, 231, 244, .12); }
 .rail-label { margin: 2px 0 15px; color: #66748c; font-size: 9px; letter-spacing: .15em; }
 .mode-filters { display: flex; flex-wrap: wrap; gap: 5px; margin: -5px 0 20px; }.mode-filters button.active { border-color: #56bfd2; background: rgba(86, 191, 210, .13); }
+.stage-label { margin-top: 22px; }
+.stage-filters { display: grid; gap: 5px; }
+.stage-filters button { display: flex; align-items: center; gap: 8px; padding: 7px; border: 1px solid transparent; color: #8995ad; background: transparent; cursor: pointer; font-size: 8px; text-align: left; }
+.stage-filters button b { color: #56bfd2; font-size: 9px; }
+.stage-filters button.active, .stage-filters button:hover { border-color: rgba(86, 191, 210, .6); background: rgba(86, 191, 210, .08); color: #f0f3f8; }
 .hero-rail-label { margin-top: 28px; }
 .map-choice { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px; margin-bottom: 7px; border: 1px solid transparent; color: #aab4c7; background: transparent; cursor: pointer; text-align: left; }
 .map-choice:hover, .map-choice.active { border-color: rgba(86, 191, 210, .7); background: rgba(86, 191, 210, .08); }
