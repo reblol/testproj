@@ -118,7 +118,7 @@ function DraftLanding() {
     <section className="draft-room">
       <div className="draft-toolbar">
         <div>
-          <h2>Draft <span>planner</span></h2>
+          <h2>Refrigerator <span>Deluxe</span></h2>
         </div>
         <div className="toolbar-actions">
           <span className="format-badge">MRC SEASON 10</span>
@@ -302,7 +302,7 @@ function App() {
         <div className="brand-lockup">
           <div className="brand-mark"><Shield size={19} strokeWidth={2.5} /></div>
           <div>
-            <div className="brand-name">UCSD MR</div>
+            <div className="brand-name">REFRIGERATOR DELUXE</div>
             <div className="brand-subtitle">UCSD // MARVEL RIVALS</div>
           </div>
         </div>
@@ -334,7 +334,7 @@ function App() {
 
         <div className="workspace">
           <div className="workspace-heading">
-            <div><span className="eyebrow">UCSD MARVEL RIVALS STRATEGY TOOL</span><span className="heading-divider">/</span><span className="workspace-name">{activeWorkspace === 'draft' ? 'DRAFT PLANNER' : 'MAP PLANNER'}</span></div>
+            <div><span className="eyebrow">REFRIGERATOR DELUXE</span><span className="heading-divider">/</span><span className="workspace-name">UCSD MARVEL RIVALS STRATEGY TOOL</span></div>
             <span className="date-stamp">09.14.26</span>
           </div>
           <ActiveLanding />

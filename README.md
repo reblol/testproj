@@ -1,4 +1,4 @@
-# Citadel // UCSD Marvel Rivals
+# Refrigerator Deluxe // UCSD Marvel Rivals
 
 UCSD's Marvel Rivals esports planning workspace.
 
