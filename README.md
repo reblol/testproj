@@ -1,4 +1,4 @@
-# Refrigerator Deluxe // UCSD Marvel Rivals
+# Collegiate Marvel Rivals Planner
 
 UCSD's Marvel Rivals esports planning workspace.
 

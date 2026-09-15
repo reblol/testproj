@@ -302,7 +302,7 @@ function App() {
         <div className="brand-lockup">
           <div className="brand-mark"><Shield size={19} strokeWidth={2.5} /></div>
           <div>
-            <div className="brand-name">REFRIGERATOR DELUXE</div>
+            <div className="brand-name">COLLEGIATE MR</div>
             <div className="brand-subtitle">UCSD // MARVEL RIVALS</div>
           </div>
         </div>
@@ -334,7 +334,7 @@ function App() {
 
         <div className="workspace">
           <div className="workspace-heading">
-            <div><span className="eyebrow">REFRIGERATOR DELUXE</span><span className="heading-divider">/</span><span className="workspace-name">UCSD MARVEL RIVALS STRATEGY TOOL</span></div>
+            <div><span className="eyebrow">COLLEGIATE MARVEL RIVALS</span><span className="heading-divider">/</span><span className="workspace-name">STRATEGY TOOL</span></div>
             <span className="date-stamp">09.14.26</span>
           </div>
           <ActiveLanding />
