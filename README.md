@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-The public asset convention lives under `public/assets/`: hero icons go in `heroes/`, and top-down map views go in `maps/`.
+The current public asset convention lives under `public/assets/heroes/` for hero icons. The Map Planner implementation and map asset folders are retained in the source as archived work and are not exposed in the current app.
 
 ## GitHub Pages
 

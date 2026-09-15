@@ -1,11 +1,10 @@
 import { useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Ban, Check, Crosshair, Eraser, LayoutGrid, Map, MousePointer2, Pencil, Radio, RotateCcw, Shield, Swords, Trash2 } from 'lucide-react'
+import { Ban, Check, Crosshair, Eraser, LayoutGrid, MousePointer2, Pencil, Radio, RotateCcw, Shield, Swords, Trash2 } from 'lucide-react'
 import './styles.css'
 
 const workspaces = [
   { id: 'draft', label: 'Draft Planner', icon: Swords },
-  { id: 'map', label: 'Map Planner', icon: Map },
 ]
 
 const heroAssetOverrides = {
@@ -285,7 +284,7 @@ function MapLanding() {
 
 function App() {
   const [activeWorkspace, setActiveWorkspace] = useState('draft')
-  const ActiveLanding = activeWorkspace === 'draft' ? DraftLanding : MapLanding
+  const ActiveLanding = DraftLanding
 
   return (
     <main className="app-shell">
