@@ -33,7 +33,7 @@ function heroAssetName(name) {
 }
 
 function assetUrl(folder, file) {
-  return `${import.meta.env.BASE_URL}assets/${folder}/${file}`
+  return `${import.meta.env.BASE_URL}assets/${folder ? `${folder}/` : ''}${file}`
 }
 
 function slugify(name) {
@@ -76,33 +76,42 @@ function DraftLanding() {
   const [roleFilter, setRoleFilter] = useState('All')
   const draft = draftFormats.mrc
   const phases = createDraftPhases(draft)
-  const selectedHeroes = new Set(actions.map((action) => action.heroId))
-
   const resetDraft = () => {
     setActions([])
   }
 
-  const placeHero = (hero, team, type, slot) => {
+  const placeHero = (hero, team, type, slot, placementId = null) => {
     if (!hero) return
     setActions((currentActions) => [
-      ...currentActions.filter((action) => action.heroId !== hero.id && !(action.team === team && action.type === type && action.slot === slot)),
-      { heroId: hero.id, hero: hero.name, role: hero.role, asset: hero.asset, team, type, slot },
+      ...currentActions.filter((action) => action.id !== placementId && !(action.team === team && action.type === type && action.slot === slot)),
+      { id: placementId || `${hero.id}-${Date.now()}-${Math.random()}`, heroId: hero.id, hero: hero.name, role: hero.role, asset: hero.asset, team, type, slot },
     ])
+  }
+
+  const readDragData = (event) => {
+    try {
+      return JSON.parse(event.dataTransfer.getData('application/json'))
+    } catch {
+      return { heroId: event.dataTransfer.getData('text/plain') }
+    }
   }
 
   const dropHero = (event, team, type, slot) => {
     event.preventDefault()
-    const hero = heroRoster.find((item) => item.id === event.dataTransfer.getData('text/plain'))
-    placeHero(hero, team, type, slot)
+    const dragData = readDragData(event)
+    const source = actions.find((action) => action.id === dragData.placementId)
+    const hero = source || heroRoster.find((item) => item.id === dragData.heroId)
+    placeHero(hero, team, type, slot, dragData.placementId)
   }
 
   const removeHero = (event) => {
     event.preventDefault()
-    const heroId = event.dataTransfer.getData('text/plain')
-    setActions((currentActions) => currentActions.filter((action) => action.heroId !== heroId))
+    const dragData = readDragData(event)
+    if (!dragData.placementId) return
+    setActions((currentActions) => currentActions.filter((action) => action.id !== dragData.placementId))
   }
 
-  const teamActions = (team, type) => Array.from({ length: Math.max(...phases.filter((item) => item.team === team && item.type === type).map((item) => item.slot), -1) + 1 }, (_, slot) => actions.find((action) => action.team === team && action.type === type && action.slot === slot))
+  const teamActions = (team, type) => Array.from({ length: type === 'composition' ? 6 : Math.max(...phases.filter((item) => item.team === team && item.type === type).map((item) => item.slot), -1) + 1 }, (_, slot) => actions.find((action) => action.team === team && action.type === type && action.slot === slot))
   const teamOrder = (team) => phases.filter((item) => item.team === team).map((item) => `${item.type}:${item.slot}`)
   const visibleHeroes = roleFilter === 'All' ? heroRoster : heroRoster.filter((hero) => hero.role.includes(roleFilter))
 
@@ -119,25 +128,25 @@ function DraftLanding() {
       </div>
 
       <div className="draft-columns">
-        <DraftSide title="TEAM 1" accent="blue" team="your" order={teamOrder('your')} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
+        <DraftSide title="TEAM 1" accent="blue" team="your" order={teamOrder('your')} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} composition={teamActions('your', 'composition')} onDrop={dropHero} />
         <div className="picker-panel">
           <div className="picker-heading"><div><span className="eyebrow">HERO POOL</span><strong>DRAG TO PLAN</strong></div><span className="phase-counter">{actions.length} / {phases.length}</span></div>
           <div className="hero-grid" onDragOver={(event) => event.preventDefault()} onDrop={removeHero}>
             <div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div>
-            {visibleHeroes.map((hero) => <button className={`hero-choice ${selectedHeroes.has(hero.id) ? 'used' : ''}`} draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.id)} key={hero.id} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
+            {visibleHeroes.map((hero) => <button className="hero-choice" draggable onDragStart={(event) => event.dataTransfer.setData('application/json', JSON.stringify({ heroId: hero.id }))} key={hero.id} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
           </div>
           <div className="picker-hint">DRAG HEROES TO ANY BAN OR SAVE SLOT // DROP BACK HERE TO REMOVE</div>
         </div>
-        <DraftSide title="TEAM 2" accent="red" team="enemy" order={teamOrder('enemy')} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
+        <DraftSide title="TEAM 2" accent="red" team="enemy" order={teamOrder('enemy')} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} composition={teamActions('enemy', 'composition')} onDrop={dropHero} />
       </div>
     </section>
   )
 }
 
-function DraftSide({ title, accent, team, order, bans, saves, onDrop }) {
-  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} draggable={Boolean(item)} onDragStart={(event) => item && event.dataTransfer.setData('text/plain', item.heroId)} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, team, type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? <><b>{item.hero}</b><small>{item.role}</small></> : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
+function DraftSide({ title, accent, team, order, bans, saves, composition, onDrop }) {
+  const lane = (type, items, icon, label) => <div className={`side-group ${type === 'composition' ? 'composition-panel' : ''}`} style={type === 'composition' ? { borderImage: `url(${assetUrl('', 'border.webp')}) 28 round` } : undefined}><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} draggable={Boolean(item)} onDragStart={(event) => item && event.dataTransfer.setData('application/json', JSON.stringify({ placementId: item.id }))} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, team, type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? <><b>{item.hero}</b><small>{item.role}</small></> : `DROP ${type === 'composition' ? 'HERO' : type.toUpperCase()}`}</div>)}</div></div>
   const orderRail = <div className="team-order">{order.map((entry, index) => { const [type, slot] = entry.split(':'); return <div className="order-step" key={`${team}-${entry}`}><b>{index + 1}</b><span>{type === 'ban' ? 'BAN' : 'SAVE'} {Number(slot) + 1}</span></div> })}</div>
-  return <section className={`draft-side ${accent}`}><div className="side-heading"><span>{title}</span><i /></div>{orderRail}<div className="side-status">FREEFORM PLANNING</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')}</section>
+  return <section className={`draft-side ${accent}`}><div className="side-heading"><span>{title}</span><i /></div>{orderRail}<div className="side-status">FREEFORM PLANNING</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')} {lane('composition', composition, <Swords size={13} />, `WHAT ${title} WILL RUN`)}</section>
 }
 
 const mapModes = {

@@ -82,6 +82,10 @@ button { font: inherit; }
 .action-slots { display: grid; gap: 7px; margin-top: 9px; }
 .action-slots.ban { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .action-slots.save { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.action-slots.composition { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.composition-panel { margin-top: 20px; padding: 12px; border: 12px solid transparent; border-image-slice: 28; background: rgba(7, 13, 25, .2); }
+.composition-panel .side-group { margin-top: 0; }
+.composition-panel .action-chip { min-height: 72px; }
 .action-chip, .empty-slot { min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 6px; border: 1px solid rgba(223, 231, 244, .1); color: #aab4c7; font-size: 8px; text-align: center; }
 .action-chip span { display: grid; place-items: center; width: 28px; height: 28px; color: #101727; background: #488bff; font: 700 10px 'Barlow Condensed', sans-serif; }
 .action-chip .action-icon { position: relative; overflow: hidden; }
