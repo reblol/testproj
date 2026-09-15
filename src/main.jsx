@@ -74,6 +74,7 @@ function createDraftPhases(draft) {
 function DraftLanding() {
   const [actions, setActions] = useState([])
   const [roleFilter, setRoleFilter] = useState('All')
+  const [heroSearch, setHeroSearch] = useState('')
   const draft = draftFormats.mrc
   const phases = createDraftPhases(draft)
   const resetDraft = () => {
@@ -112,7 +113,7 @@ function DraftLanding() {
   }
 
   const teamActions = (team, type) => Array.from({ length: type === 'composition' ? 6 : Math.max(...phases.filter((item) => item.team === team && item.type === type).map((item) => item.slot), -1) + 1 }, (_, slot) => actions.find((action) => action.team === team && action.type === type && action.slot === slot))
-  const visibleHeroes = roleFilter === 'All' ? heroRoster : heroRoster.filter((hero) => hero.role.includes(roleFilter))
+  const visibleHeroes = heroRoster.filter((hero) => (roleFilter === 'All' || hero.role.includes(roleFilter)) && hero.name.toLowerCase().includes(heroSearch.toLowerCase().trim()))
 
   return (
     <section className="draft-room">
@@ -133,7 +134,7 @@ function DraftLanding() {
         </div>
         <div className="picker-panel">
           <div className="picker-heading"><div><span className="eyebrow">HERO POOL</span><strong>DRAG TO PLAN</strong></div><span className="phase-counter">{actions.length} / {phases.length}</span></div>
-          <div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div>
+          <div className="hero-controls"><div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div><input className="hero-search" value={heroSearch} onChange={(event) => setHeroSearch(event.target.value)} placeholder="SEARCH HEROES" aria-label="Search heroes" /></div>
           <div className="hero-grid" onDragOver={(event) => event.preventDefault()} onDrop={removeHero}>
             {visibleHeroes.map((hero) => <button className="hero-choice" draggable onDragStart={(event) => event.dataTransfer.setData('application/json', JSON.stringify({ heroId: hero.id }))} key={hero.id} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
           </div>

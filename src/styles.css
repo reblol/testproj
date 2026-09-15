@@ -59,8 +59,8 @@ button { font: inherit; }
 .phase-step.current b, .phase-step.current i { color: #ef4b3f; background: #ef4b3f; }
 .phase-step.complete { color: #93a0b4; }
 .phase-step.complete b { color: #ef4b3f; }
-.draft-layout { margin-top: 16px; }
-.draft-teams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.draft-layout { min-width: 0; margin-top: 16px; }
+.draft-teams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; min-width: 0; }
 .draft-side, .picker-panel { min-height: 420px; border: 1px solid rgba(223, 231, 244, .13); background: rgba(7, 13, 25, .24); }
 .draft-side { padding: 14px; }
 .draft-side.blue.acting { border-color: rgba(72, 139, 255, .75); box-shadow: inset 0 2px 0 #488bff; }
@@ -103,14 +103,17 @@ button { font: inherit; }
 .draft-side.red .action-chip span { background: #ef4b3f; }
 .action-slots.picks .action-chip span { border-radius: 50%; }
 .empty-slot { justify-content: center; min-height: 43px; border-style: dashed; color: #46526a; letter-spacing: .1em; }
-.picker-panel { min-height: 0; margin-top: 12px; padding: 14px; }
+.picker-panel { min-width: 0; min-height: 0; margin-top: 12px; padding: 14px; }
 .picker-heading { display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid rgba(223, 231, 244, .11); }
 .picker-heading strong { display: block; margin-top: 6px; color: #f0f3f8; font: 600 24px/1 'Barlow Condensed', sans-serif; letter-spacing: .07em; }
 .phase-counter { color: #ef4b3f; font-size: 10px; letter-spacing: .1em; }
-.hero-grid { display: grid; grid-template-rows: repeat(3, minmax(72px, auto)); grid-auto-flow: column; grid-auto-columns: minmax(170px, 190px); gap: 9px; margin-top: 14px; padding: 2px 2px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: #488bff rgba(255, 255, 255, .08); scrollbar-width: thin; }
-.role-filters { display: flex; gap: 5px; margin-top: 14px; margin-bottom: 2px; }
+.hero-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; margin-top: 14px; }
+.hero-grid { display: grid; grid-template-rows: repeat(3, minmax(72px, auto)); grid-auto-flow: column; grid-auto-columns: minmax(170px, 190px); gap: 9px; min-width: 0; margin-top: 10px; padding: 2px 2px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: #488bff rgba(255, 255, 255, .08); scrollbar-width: thin; }
+.role-filters { display: flex; flex: 0 0 auto; gap: 5px; margin: 0; }
 .role-filters button, .mode-filters button { padding: 7px 9px; border: 1px solid rgba(223, 231, 244, .12); color: #718097; background: transparent; cursor: pointer; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
 .role-filters button.active, .mode-filters button.active { border-color: #ef4b3f; color: #fff; background: rgba(239, 75, 63, .15); }
+.hero-search { width: min(220px, 30%); min-width: 130px; padding: 8px 10px; border: 1px solid rgba(223, 231, 244, .18); outline: 0; color: #e9edf5; background: rgba(255, 255, 255, .035); font: inherit; font-size: 10px; letter-spacing: .08em; }
+.hero-search::placeholder { color: #718097; }.hero-search:focus { border-color: #488bff; }
 .hero-choice { display: flex; flex: 0 0 190px; align-items: center; gap: 10px; min-width: 190px; min-height: 72px; padding: 9px; border: 1px solid rgba(223, 231, 244, .12); color: #cbd3df; background: rgba(255, 255, 255, .025); cursor: pointer; text-align: left; transition: .18s ease; }
 .hero-choice > span:last-child { min-width: 0; }
 .hero-choice:hover:not(:disabled) { border-color: #ef4b3f; background: rgba(239, 75, 63, .12); transform: translateY(-2px); }
@@ -209,6 +212,8 @@ h1 span { color: #ef4b3f; }
   .draft-side { min-height: 0; }
   .hero-grid { grid-auto-columns: 170px; }
   .hero-choice { min-width: 0; }
+  .hero-controls { flex-wrap: wrap; }
+  .hero-search { width: 100%; min-width: 0; }
   .map-room { padding-top: 24px; }
   .map-toolbar { display: block; }
   .map-actions { margin-top: 20px; }
