@@ -126,8 +126,11 @@ function DraftLanding() {
         </div>
       </div>
 
-      <div className="draft-columns">
-        <DraftSide title="TEAM 1" accent="blue" team="your" bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} composition={teamActions('your', 'composition')} onDrop={dropHero} />
+      <div className="draft-layout">
+        <div className="draft-teams">
+          <DraftSide title="TEAM 1" accent="blue" team="your" bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} composition={teamActions('your', 'composition')} onDrop={dropHero} />
+          <DraftSide title="TEAM 2" accent="red" team="enemy" bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} composition={teamActions('enemy', 'composition')} onDrop={dropHero} />
+        </div>
         <div className="picker-panel">
           <div className="picker-heading"><div><span className="eyebrow">HERO POOL</span><strong>DRAG TO PLAN</strong></div><span className="phase-counter">{actions.length} / {phases.length}</span></div>
           <div className="hero-grid" onDragOver={(event) => event.preventDefault()} onDrop={removeHero}>
@@ -136,7 +139,6 @@ function DraftLanding() {
           </div>
           <div className="picker-hint">DRAG HEROES TO ANY BAN OR SAVE SLOT // DROP BACK HERE TO REMOVE</div>
         </div>
-        <DraftSide title="TEAM 2" accent="red" team="enemy" bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} composition={teamActions('enemy', 'composition')} onDrop={dropHero} />
       </div>
     </section>
   )
