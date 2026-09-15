@@ -109,7 +109,8 @@ button { font: inherit; }
 .picker-heading strong { display: block; margin-top: 6px; color: #f0f3f8; font: 600 24px/1 'Barlow Condensed', sans-serif; letter-spacing: .07em; }
 .phase-counter { color: #ef4b3f; font-size: 10px; letter-spacing: .1em; }
 .hero-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; margin-top: 14px; }
-.hero-grid { display: flex; flex-flow: column wrap; align-content: flex-start; width: 100%; max-width: 100%; min-width: 0; height: 262px; gap: 9px; margin-top: 10px; padding: 2px 2px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: #488bff rgba(255, 255, 255, .08); scrollbar-width: thin; }
+.hero-grid { display: flex; align-items: flex-start; width: 100%; max-width: 100%; min-width: 0; height: 262px; gap: 9px; margin-top: 10px; padding: 2px 2px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: #488bff rgba(255, 255, 255, .08); scrollbar-width: thin; }
+.hero-column { display: grid; flex: 0 0 190px; grid-template-rows: repeat(3, 76px); gap: 9px; }
 .role-filters { display: flex; flex: 0 0 auto; gap: 5px; margin: 0; }
 .role-filters button, .mode-filters button { padding: 7px 9px; border: 1px solid rgba(223, 231, 244, .12); color: #718097; background: transparent; cursor: pointer; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
 .role-filters button.active, .mode-filters button.active { border-color: #ef4b3f; color: #fff; background: rgba(239, 75, 63, .15); }
@@ -212,6 +213,7 @@ h1 span { color: #ef4b3f; }
   .draft-teams { grid-template-columns: 1fr; }
   .draft-side { min-height: 0; }
   .hero-grid { height: 250px; }
+  .hero-column { flex-basis: 170px; grid-template-rows: repeat(3, 72px); }
   .hero-choice { flex-basis: 170px; width: 170px; height: 72px; }
   .hero-controls { flex-wrap: wrap; }
   .hero-search { width: 100%; min-width: 0; }

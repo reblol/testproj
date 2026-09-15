@@ -114,6 +114,7 @@ function DraftLanding() {
 
   const teamActions = (team, type) => Array.from({ length: type === 'composition' ? 6 : Math.max(...phases.filter((item) => item.team === team && item.type === type).map((item) => item.slot), -1) + 1 }, (_, slot) => actions.find((action) => action.team === team && action.type === type && action.slot === slot))
   const visibleHeroes = heroRoster.filter((hero) => (roleFilter === 'All' || hero.role.includes(roleFilter)) && hero.name.toLowerCase().includes(heroSearch.toLowerCase().trim()))
+  const heroColumns = Array.from({ length: Math.ceil(visibleHeroes.length / 3) }, (_, columnIndex) => visibleHeroes.slice(columnIndex * 3, columnIndex * 3 + 3))
 
   return (
     <section className="draft-room">
@@ -136,7 +137,7 @@ function DraftLanding() {
           <div className="picker-heading"><div><span className="eyebrow">HERO POOL</span><strong>DRAG TO PLAN</strong></div><span className="phase-counter">{actions.length} / {phases.length}</span></div>
           <div className="hero-controls"><div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div><input className="hero-search" value={heroSearch} onChange={(event) => setHeroSearch(event.target.value)} placeholder="SEARCH HEROES" aria-label="Search heroes" /></div>
           <div className="hero-grid" onDragOver={(event) => event.preventDefault()} onDrop={removeHero}>
-            {visibleHeroes.map((hero) => <button className="hero-choice" draggable onDragStart={(event) => event.dataTransfer.setData('application/json', JSON.stringify({ heroId: hero.id }))} key={hero.id} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
+            {heroColumns.map((column, columnIndex) => <div className="hero-column" key={columnIndex}>{column.map((hero) => <button className="hero-choice" draggable onDragStart={(event) => event.dataTransfer.setData('application/json', JSON.stringify({ heroId: hero.id }))} key={hero.id} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}</div>)}
           </div>
           <div className="picker-hint">DRAG HEROES TO ANY BAN OR SAVE SLOT // DROP BACK HERE TO REMOVE</div>
         </div>
