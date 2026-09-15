@@ -72,31 +72,34 @@ function createDraftPhases(draft) {
 }
 
 function DraftLanding() {
-  const [format] = useState('mrc')
-  const [activePhase, setActivePhase] = useState(0)
   const [actions, setActions] = useState([])
   const [roleFilter, setRoleFilter] = useState('All')
-  const draft = draftFormats[format]
+  const draft = draftFormats.mrc
   const phases = createDraftPhases(draft)
-  const phase = phases[activePhase]
   const selectedHeroes = new Set(actions.map((action) => action.heroId))
 
   const resetDraft = () => {
-    setActivePhase(0)
     setActions([])
   }
 
-  const assignHero = (hero, team = phase?.team, type = phase?.type, slot = phase?.slot) => {
-    if (!hero || !phase || actions.length !== activePhase || team !== phase.team || type !== phase.type) return
-    if (selectedHeroes.has(hero.id) || actions.some((action) => action.team === team && action.type === type && action.slot === slot)) return
-    setActions([...actions, { heroId: hero.id, hero: hero.name, role: hero.role, asset: hero.asset, team, type, slot }])
-    setActivePhase(activePhase + 1)
+  const placeHero = (hero, team, type, slot) => {
+    if (!hero) return
+    setActions((currentActions) => [
+      ...currentActions.filter((action) => action.heroId !== hero.id && !(action.team === team && action.type === type && action.slot === slot)),
+      { heroId: hero.id, hero: hero.name, role: hero.role, asset: hero.asset, team, type, slot },
+    ])
   }
 
   const dropHero = (event, team, type, slot) => {
     event.preventDefault()
     const hero = heroRoster.find((item) => item.id === event.dataTransfer.getData('text/plain'))
-    assignHero(hero, team, type, slot)
+    placeHero(hero, team, type, slot)
+  }
+
+  const removeHero = (event) => {
+    event.preventDefault()
+    const heroId = event.dataTransfer.getData('text/plain')
+    setActions((currentActions) => currentActions.filter((action) => action.heroId !== heroId))
   }
 
   const teamActions = (team, type) => Array.from({ length: Math.max(...phases.filter((item) => item.team === team && item.type === type).map((item) => item.slot), -1) + 1 }, (_, slot) => actions.find((action) => action.team === team && action.type === type && action.slot === slot))
@@ -116,25 +119,25 @@ function DraftLanding() {
       </div>
 
       <div className="draft-columns">
-        <DraftSide title="TEAM 1" accent="blue" team="your" order={teamOrder('your')} active={phase?.team === 'your'} action={phase?.type} activePhase={phase} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
+        <DraftSide title="TEAM 1" accent="blue" team="your" order={teamOrder('your')} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
         <div className="picker-panel">
-          <div className="picker-heading"><div><span className="eyebrow">{phase ? 'NOW SELECTING' : 'DRAFT STATUS'}</span><strong>{phase ? phase.label : 'DRAFT COMPLETE'}</strong></div><span className="phase-counter">{String(Math.min(activePhase + 1, phases.length)).padStart(2, '0')} / {String(phases.length).padStart(2, '0')}</span></div>
-          <div className="hero-grid">
+          <div className="picker-heading"><div><span className="eyebrow">HERO POOL</span><strong>DRAG TO PLAN</strong></div><span className="phase-counter">{actions.length} / {phases.length}</span></div>
+          <div className="hero-grid" onDragOver={(event) => event.preventDefault()} onDrop={removeHero}>
             <div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div>
-            {visibleHeroes.map((hero) => <button className={`hero-choice ${selectedHeroes.has(hero.id) || !phase ? 'used' : ''}`} draggable={!selectedHeroes.has(hero.id) && Boolean(phase)} onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.id)} key={hero.id} onClick={() => assignHero(hero)} disabled={selectedHeroes.has(hero.id) || !phase} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
+            {visibleHeroes.map((hero) => <button className={`hero-choice ${selectedHeroes.has(hero.id) ? 'used' : ''}`} draggable onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.id)} key={hero.id} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
           </div>
-          <div className="picker-hint">{phase ? `DRAG OR SELECT A HERO TO LOCK IN ${phase.type.toUpperCase()}` : 'RESET TO START A NEW DRAFT'}</div>
+          <div className="picker-hint">DRAG HEROES TO ANY BAN OR SAVE SLOT // DROP BACK HERE TO REMOVE</div>
         </div>
-        <DraftSide title="TEAM 2" accent="red" team="enemy" order={teamOrder('enemy')} active={phase?.team === 'enemy'} action={phase?.type} activePhase={phase} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
+        <DraftSide title="TEAM 2" accent="red" team="enemy" order={teamOrder('enemy')} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
       </div>
     </section>
   )
 }
 
-function DraftSide({ title, accent, team, order, active, action, activePhase, bans, saves, onDrop }) {
-  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, team, type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? <><b>{item.hero}</b><small>{item.role}</small></> : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
-  const orderRail = <div className="team-order">{order.map((entry, index) => { const [type, slot] = entry.split(':'); const isCurrent = active && activePhase?.team === team && activePhase?.type === type && activePhase?.slot === Number(slot); return <div className={`order-step ${isCurrent ? 'current' : ''} ${index < order.findIndex((item) => item === `${activePhase?.type}:${activePhase?.slot}`) ? 'complete' : ''}`} key={`${team}-${entry}`}><b>{index + 1}</b><span>{type === 'ban' ? 'BAN' : 'SAVE'} {Number(slot) + 1}</span></div> })}</div>
-  return <section className={`draft-side ${accent} ${active ? 'acting' : ''}`}><div className="side-heading"><span>{title}</span><i /></div>{orderRail}<div className={`side-status ${active ? 'active' : ''}`}>{active ? `CURRENT TURN // ${action.toUpperCase()}` : 'WAITING'}</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')}</section>
+function DraftSide({ title, accent, team, order, bans, saves, onDrop }) {
+  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} draggable={Boolean(item)} onDragStart={(event) => item && event.dataTransfer.setData('text/plain', item.heroId)} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, team, type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? <><b>{item.hero}</b><small>{item.role}</small></> : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
+  const orderRail = <div className="team-order">{order.map((entry, index) => { const [type, slot] = entry.split(':'); return <div className="order-step" key={`${team}-${entry}`}><b>{index + 1}</b><span>{type === 'ban' ? 'BAN' : 'SAVE'} {Number(slot) + 1}</span></div> })}</div>
+  return <section className={`draft-side ${accent}`}><div className="side-heading"><span>{title}</span><i /></div>{orderRail}<div className="side-status">FREEFORM PLANNING</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')}</section>
 }
 
 const mapModes = {
