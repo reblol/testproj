@@ -116,7 +116,7 @@ function DraftLanding() {
       </div>
 
       <div className="draft-columns">
-        <DraftSide title="YOUR TEAM" accent="red" team="your" order={teamOrder('your')} active={phase?.team === 'your'} action={phase?.type} activePhase={phase} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
+        <DraftSide title="TEAM 1" accent="blue" team="your" order={teamOrder('your')} active={phase?.team === 'your'} action={phase?.type} activePhase={phase} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} onDrop={dropHero} />
         <div className="picker-panel">
           <div className="picker-heading"><div><span className="eyebrow">{phase ? 'NOW SELECTING' : 'DRAFT STATUS'}</span><strong>{phase ? phase.label : 'DRAFT COMPLETE'}</strong></div><span className="phase-counter">{String(Math.min(activePhase + 1, phases.length)).padStart(2, '0')} / {String(phases.length).padStart(2, '0')}</span></div>
           <div className="hero-grid">
@@ -125,14 +125,14 @@ function DraftLanding() {
           </div>
           <div className="picker-hint">{phase ? `DRAG OR SELECT A HERO TO LOCK IN ${phase.type.toUpperCase()}` : 'RESET TO START A NEW DRAFT'}</div>
         </div>
-        <DraftSide title="ENEMY TEAM" accent="cyan" team="enemy" order={teamOrder('enemy')} active={phase?.team === 'enemy'} action={phase?.type} activePhase={phase} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
+        <DraftSide title="TEAM 2" accent="red" team="enemy" order={teamOrder('enemy')} active={phase?.team === 'enemy'} action={phase?.type} activePhase={phase} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} onDrop={dropHero} />
       </div>
     </section>
   )
 }
 
 function DraftSide({ title, accent, team, order, active, action, activePhase, bans, saves, onDrop }) {
-  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, title === 'YOUR TEAM' ? 'your' : 'enemy', type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? item.hero : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
+  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, team, type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? item.hero : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
   const orderRail = <div className="team-order">{order.map((entry, index) => { const [type, slot] = entry.split(':'); const isCurrent = active && activePhase?.team === team && activePhase?.type === type && activePhase?.slot === Number(slot); return <div className={`order-step ${isCurrent ? 'current' : ''} ${index < order.findIndex((item) => item === `${activePhase?.type}:${activePhase?.slot}`) ? 'complete' : ''}`} key={`${team}-${entry}`}><b>{index + 1}</b><span>{type === 'ban' ? 'BAN' : 'SAVE'} {Number(slot) + 1}</span></div> })}</div>
   return <section className={`draft-side ${accent} ${active ? 'acting' : ''}`}><div className="side-heading"><span>{title}</span><i /></div>{orderRail}<div className={`side-status ${active ? 'active' : ''}`}>{active ? `CURRENT TURN // ${action.toUpperCase()}` : 'WAITING'}</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')}</section>
 }
