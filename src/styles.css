@@ -60,9 +60,9 @@ button { font: inherit; }
 .phase-step.complete { color: #93a0b4; }
 .phase-step.complete b { color: #ef4b3f; }
 .draft-room { max-width: 100%; overflow-x: hidden; }
-.draft-layout { width: 100%; max-width: 100%; min-width: 0; margin-top: 16px; }
+.draft-layout { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; max-width: 100%; min-width: 0; margin-top: 16px; overflow: hidden; }
 .draft-teams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; min-width: 0; }
-.draft-side, .picker-panel { min-height: 420px; border: 1px solid rgba(223, 231, 244, .13); background: rgba(7, 13, 25, .24); }
+.draft-side, .picker-panel { min-width: 0; min-height: 420px; border: 1px solid rgba(223, 231, 244, .13); background: rgba(7, 13, 25, .24); }
 .draft-side { padding: 14px; }
 .draft-side.blue.acting { border-color: rgba(72, 139, 255, .75); box-shadow: inset 0 2px 0 #488bff; }
 .draft-side.red.acting { border-color: rgba(239, 75, 63, .75); box-shadow: inset 0 2px 0 #ef4b3f; }
@@ -109,7 +109,7 @@ button { font: inherit; }
 .picker-heading strong { display: block; margin-top: 6px; color: #f0f3f8; font: 600 24px/1 'Barlow Condensed', sans-serif; letter-spacing: .07em; }
 .phase-counter { color: #ef4b3f; font-size: 10px; letter-spacing: .1em; }
 .hero-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; margin-top: 14px; }
-.hero-grid { display: flex; align-items: flex-start; width: 100%; max-width: 100%; min-width: 0; height: 262px; gap: 9px; margin-top: 10px; padding: 2px 2px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: #488bff rgba(255, 255, 255, .08); scrollbar-width: thin; }
+.hero-grid { display: flex; align-items: flex-start; width: 0; min-width: 100%; max-width: 100%; height: 262px; gap: 9px; margin-top: 10px; padding: 2px 2px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: #488bff rgba(255, 255, 255, .08); scrollbar-width: thin; }
 .hero-column { display: grid; flex: 0 0 190px; grid-template-rows: repeat(3, 76px); gap: 9px; }
 .role-filters { display: flex; flex: 0 0 auto; gap: 5px; margin: 0; }
 .role-filters button, .mode-filters button { padding: 7px 9px; border: 1px solid rgba(223, 231, 244, .12); color: #718097; background: transparent; cursor: pointer; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
