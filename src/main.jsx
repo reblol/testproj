@@ -118,7 +118,7 @@ function DraftLanding() {
     <section className="draft-room">
       <div className="draft-toolbar">
         <div>
-          <h2>Refrigerator <span>Deluxe</span></h2>
+          <h2>Collegiate <span>Planner</span></h2>
         </div>
         <div className="toolbar-actions">
           <span className="format-badge">MRC SEASON 10</span>
