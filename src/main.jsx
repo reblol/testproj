@@ -112,7 +112,6 @@ function DraftLanding() {
   }
 
   const teamActions = (team, type) => Array.from({ length: type === 'composition' ? 6 : Math.max(...phases.filter((item) => item.team === team && item.type === type).map((item) => item.slot), -1) + 1 }, (_, slot) => actions.find((action) => action.team === team && action.type === type && action.slot === slot))
-  const teamOrder = (team) => phases.filter((item) => item.team === team).map((item) => `${item.type}:${item.slot}`)
   const visibleHeroes = roleFilter === 'All' ? heroRoster : heroRoster.filter((hero) => hero.role.includes(roleFilter))
 
   return (
@@ -128,7 +127,7 @@ function DraftLanding() {
       </div>
 
       <div className="draft-columns">
-        <DraftSide title="TEAM 1" accent="blue" team="your" order={teamOrder('your')} bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} composition={teamActions('your', 'composition')} onDrop={dropHero} />
+        <DraftSide title="TEAM 1" accent="blue" team="your" bans={teamActions('your', 'ban')} saves={teamActions('your', 'save')} composition={teamActions('your', 'composition')} onDrop={dropHero} />
         <div className="picker-panel">
           <div className="picker-heading"><div><span className="eyebrow">HERO POOL</span><strong>DRAG TO PLAN</strong></div><span className="phase-counter">{actions.length} / {phases.length}</span></div>
           <div className="hero-grid" onDragOver={(event) => event.preventDefault()} onDrop={removeHero}>
@@ -137,16 +136,15 @@ function DraftLanding() {
           </div>
           <div className="picker-hint">DRAG HEROES TO ANY BAN OR SAVE SLOT // DROP BACK HERE TO REMOVE</div>
         </div>
-        <DraftSide title="TEAM 2" accent="red" team="enemy" order={teamOrder('enemy')} bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} composition={teamActions('enemy', 'composition')} onDrop={dropHero} />
+        <DraftSide title="TEAM 2" accent="red" team="enemy" bans={teamActions('enemy', 'ban')} saves={teamActions('enemy', 'save')} composition={teamActions('enemy', 'composition')} onDrop={dropHero} />
       </div>
     </section>
   )
 }
 
-function DraftSide({ title, accent, team, order, bans, saves, composition, onDrop }) {
-  const lane = (type, items, icon, label) => <div className={`side-group ${type === 'composition' ? 'composition-panel' : ''}`} style={type === 'composition' ? { borderImage: `url(${assetUrl('', 'border.webp')}) 28 round` } : undefined}><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} draggable={Boolean(item)} onDragStart={(event) => item && event.dataTransfer.setData('application/json', JSON.stringify({ placementId: item.id }))} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, team, type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? <><b>{item.hero}</b><small>{item.role}</small></> : `DROP ${type === 'composition' ? 'HERO' : type.toUpperCase()}`}</div>)}</div></div>
-  const orderRail = <div className="team-order">{order.map((entry, index) => { const [type, slot] = entry.split(':'); return <div className="order-step" key={`${team}-${entry}`}><b>{index + 1}</b><span>{type === 'ban' ? 'BAN' : 'SAVE'} {Number(slot) + 1}</span></div> })}</div>
-  return <section className={`draft-side ${accent}`}><div className="side-heading"><span>{title}</span><i /></div>{orderRail}<div className="side-status">FREEFORM PLANNING</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')} {lane('composition', composition, <Swords size={13} />, `WHAT ${title} WILL RUN`)}</section>
+function DraftSide({ title, accent, team, bans, saves, composition, onDrop }) {
+  const lane = (type, items, icon, label) => <div className={`side-group ${type === 'composition' ? 'composition-panel' : ''}`} style={type === 'composition' ? { borderImage: `url(${assetUrl('', 'border.webp')}) 28 round` } : undefined}><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} style={{ borderImage: `url(${assetUrl('', 'border.webp')}) 28 round` }} draggable={Boolean(item)} onDragStart={(event) => item && event.dataTransfer.setData('application/json', JSON.stringify({ placementId: item.id }))} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, team, type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? <><b>{item.hero}</b><small>{item.role}</small></> : `DROP ${type === 'composition' ? 'HERO' : type.toUpperCase()}`}</div>)}</div></div>
+  return <section className={`draft-side ${accent}`}><div className="side-heading"><span>{title}</span><i /></div><div className="side-status">FREEFORM PLANNING</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')} {lane('composition', composition, <Swords size={13} />, `WHAT ${title} WILL RUN`)}</section>
 }
 
 const mapModes = {
