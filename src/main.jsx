@@ -16,7 +16,7 @@ const heroAssetOverrides = {
 const heroRoster = [
   ['Adam Warlock', 'Strategist'], ['Angela', 'Vanguard'], ['Black Cat', 'Duelist'], ['Black Panther', 'Duelist'],
   ['Black Widow', 'Duelist'], ['Blade', 'Duelist'], ['Captain America', 'Vanguard'], ['Cloak & Dagger', 'Strategist'],
-  ['Cyclops', 'Duelist'], ['Daredevil', 'Duelist'], ['Deadpool', 'Duelist / Strategist / Vanguard'], ['Devil Dinosaur', 'Vanguard'], ['Doctor Strange', 'Vanguard'],
+  ['Cyclops', 'Duelist'], ['Daredevil', 'Duelist'], ['Deadpool', 'Duelist'], ['Deadpool', 'Strategist'], ['Deadpool', 'Vanguard'], ['Devil Dinosaur', 'Vanguard'], ['Doctor Strange', 'Vanguard'],
   ['Elsa Bloodstone', 'Duelist'], ['Emma Frost', 'Vanguard'], ['Gambit', 'Strategist'], ['Gorr the God Butcher', 'Duelist'],
   ['Groot', 'Vanguard'], ['Hawkeye', 'Duelist'], ['Hela', 'Duelist'], ['Hulk', 'Vanguard'], ['Human Torch', 'Duelist'],
   ['Invisible Woman', 'Strategist'], ['Iron Fist', 'Duelist'], ['Iron Man', 'Duelist'], ['Jeff the Land Shark', 'Strategist'],
@@ -26,7 +26,7 @@ const heroRoster = [
   ['Spider-Man', 'Duelist'], ['Squirrel Girl', 'Duelist'], ['Star-Lord', 'Duelist'], ['Storm', 'Duelist'], ['The Hood', 'Vanguard'],
   ['The Punisher', 'Duelist'], ['The Thing', 'Vanguard'], ['Thor', 'Vanguard'], ['Ultron', 'Strategist'], ['Venom', 'Vanguard'],
   ['White Fox', 'Strategist'], ['Winter Soldier', 'Duelist'], ['Wolverine', 'Duelist'],
-].map(([name, role]) => ({ name, role, tone: heroTone(role), asset: heroAssetName(name) }))
+].map(([name, role], index) => ({ id: `${slugify(name)}-${slugify(role)}-${index}`, name, role, tone: heroTone(role), asset: heroAssetName(name) }))
 
 function heroAssetName(name) {
   return heroAssetOverrides[name] || `lord-${slugify(name)}.png`
@@ -79,7 +79,7 @@ function DraftLanding() {
   const draft = draftFormats[format]
   const phases = createDraftPhases(draft)
   const phase = phases[activePhase]
-  const selectedHeroes = new Set(actions.map((action) => action.hero))
+  const selectedHeroes = new Set(actions.map((action) => action.heroId))
 
   const resetDraft = () => {
     setActivePhase(0)
@@ -88,14 +88,14 @@ function DraftLanding() {
 
   const assignHero = (hero, team = phase?.team, type = phase?.type, slot = phase?.slot) => {
     if (!hero || !phase || actions.length !== activePhase || team !== phase.team || type !== phase.type) return
-    if (selectedHeroes.has(hero.name) || actions.some((action) => action.team === team && action.type === type && action.slot === slot)) return
-    setActions([...actions, { hero: hero.name, team, type, slot }])
+    if (selectedHeroes.has(hero.id) || actions.some((action) => action.team === team && action.type === type && action.slot === slot)) return
+    setActions([...actions, { heroId: hero.id, hero: hero.name, role: hero.role, asset: hero.asset, team, type, slot }])
     setActivePhase(activePhase + 1)
   }
 
   const dropHero = (event, team, type, slot) => {
     event.preventDefault()
-    const hero = heroRoster.find((item) => item.name === event.dataTransfer.getData('text/plain'))
+    const hero = heroRoster.find((item) => item.id === event.dataTransfer.getData('text/plain'))
     assignHero(hero, team, type, slot)
   }
 
@@ -121,7 +121,7 @@ function DraftLanding() {
           <div className="picker-heading"><div><span className="eyebrow">{phase ? 'NOW SELECTING' : 'DRAFT STATUS'}</span><strong>{phase ? phase.label : 'DRAFT COMPLETE'}</strong></div><span className="phase-counter">{String(Math.min(activePhase + 1, phases.length)).padStart(2, '0')} / {String(phases.length).padStart(2, '0')}</span></div>
           <div className="hero-grid">
             <div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div>
-            {visibleHeroes.map((hero) => <button className={`hero-choice ${selectedHeroes.has(hero.name) || !phase ? 'used' : ''}`} draggable={!selectedHeroes.has(hero.name) && Boolean(phase)} onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.name)} key={hero.name} onClick={() => assignHero(hero)} disabled={selectedHeroes.has(hero.name) || !phase} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
+            {visibleHeroes.map((hero) => <button className={`hero-choice ${selectedHeroes.has(hero.id) || !phase ? 'used' : ''}`} draggable={!selectedHeroes.has(hero.id) && Boolean(phase)} onDragStart={(event) => event.dataTransfer.setData('text/plain', hero.id)} key={hero.id} onClick={() => assignHero(hero)} disabled={selectedHeroes.has(hero.id) || !phase} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
           </div>
           <div className="picker-hint">{phase ? `DRAG OR SELECT A HERO TO LOCK IN ${phase.type.toUpperCase()}` : 'RESET TO START A NEW DRAFT'}</div>
         </div>
@@ -132,7 +132,7 @@ function DraftLanding() {
 }
 
 function DraftSide({ title, accent, team, order, active, action, activePhase, bans, saves, onDrop }) {
-  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, team, type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? item.hero : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
+  const lane = (type, items, icon, label) => <div className="side-group"><label>{icon} {label}</label><div className={`action-slots ${type}`}>{items.map((item, slot) => <div className={`action-chip drop-slot ${item ? 'filled' : ''}`} key={`${type}-${slot}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => onDrop(event, team, type, slot)}><span className="action-icon">{item ? <><img src={assetUrl('heroes', item.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{item.hero.slice(0, 2).toUpperCase()}</> : String(slot + 1).padStart(2, '0')}</span>{item ? <><b>{item.hero}</b><small>{item.role}</small></> : `DROP ${type.toUpperCase()}`}</div>)}</div></div>
   const orderRail = <div className="team-order">{order.map((entry, index) => { const [type, slot] = entry.split(':'); const isCurrent = active && activePhase?.team === team && activePhase?.type === type && activePhase?.slot === Number(slot); return <div className={`order-step ${isCurrent ? 'current' : ''} ${index < order.findIndex((item) => item === `${activePhase?.type}:${activePhase?.slot}`) ? 'complete' : ''}`} key={`${team}-${entry}`}><b>{index + 1}</b><span>{type === 'ban' ? 'BAN' : 'SAVE'} {Number(slot) + 1}</span></div> })}</div>
   return <section className={`draft-side ${accent} ${active ? 'acting' : ''}`}><div className="side-heading"><span>{title}</span><i /></div>{orderRail}<div className={`side-status ${active ? 'active' : ''}`}>{active ? `CURRENT TURN // ${action.toUpperCase()}` : 'WAITING'}</div>{lane('ban', bans, <Ban size={13} />, 'BANS')} {lane('save', saves, <Check size={13} />, 'SAVES')}</section>
 }
