@@ -11,7 +11,7 @@
 body { margin: 0; min-width: 320px; background: #101727; }
 button { font: inherit; }
 .drop-slot { cursor: copy; }
-.drop-slot:not(.filled):hover { border-color: #ef4b3f; background: rgba(239, 75, 63, .1); }
+.drop-slot:not(.filled):hover { border-color: #ef4b3f; background-color: rgba(239, 75, 63, .1); }
 
 .app-shell { min-height: 100vh; overflow: hidden; background: linear-gradient(135deg, #101727 0%, #131d31 58%, #19243b 100%); }
 .topbar { height: 78px; display: flex; align-items: center; justify-content: space-between; padding: 0 4.5vw; border-bottom: 1px solid rgba(223, 231, 244, .15); background: rgba(12, 19, 34, .48); }
@@ -86,14 +86,16 @@ button { font: inherit; }
 .composition-panel { margin-top: 20px; padding: 12px; background: transparent; }
 .composition-panel .side-group { margin-top: 0; }
 .composition-panel .action-chip { min-height: 112px; border: 0; background-color: transparent; background-position: center; background-repeat: no-repeat; background-size: 100% 100%; }
+.composition-panel .action-chip:hover { transform: none; background-size: 100% 100%; }
 .action-chip, .empty-slot { min-height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 6px; border: 6px solid transparent; color: #aab4c7; font-size: 8px; text-align: center; }
 .action-slots.ban .action-chip, .action-slots.save .action-chip { border: 1px solid rgba(223, 231, 244, .1); }
 .action-chip span { display: grid; place-items: center; width: 28px; height: 28px; color: #101727; background: #488bff; font: 700 10px 'Barlow Condensed', sans-serif; }
 .action-chip .action-icon { position: relative; overflow: hidden; }
 .action-chip .action-icon img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .action-slots.composition .action-icon { width: 54px; height: 54px; color: transparent; background: transparent; }
-.action-slots.composition .action-icon img { border-radius: 50%; }
+.action-slots.composition .action-icon img { border-radius: 0; object-fit: contain; }
 .draft-side.red .action-slots.composition .action-icon, .draft-side.blue .action-slots.composition .action-icon { background: transparent; }
+.action-slots.composition .drop-slot:not(.filled):hover { border-color: transparent; background-color: transparent; }
 .action-slots.composition .action-chip b { color: #f0f3f8; }
 .action-chip b, .action-chip small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .action-chip small { color: #718097; font-size: 7px; }
