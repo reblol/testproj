@@ -107,7 +107,7 @@ button { font: inherit; }
 .picker-heading { display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid rgba(223, 231, 244, .11); }
 .picker-heading strong { display: block; margin-top: 6px; color: #f0f3f8; font: 600 24px/1 'Barlow Condensed', sans-serif; letter-spacing: .07em; }
 .phase-counter { color: #ef4b3f; font-size: 10px; letter-spacing: .1em; }
-.hero-grid { display: flex; flex-wrap: nowrap; gap: 9px; margin-top: 14px; padding: 2px 2px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: #488bff rgba(255, 255, 255, .08); scrollbar-width: thin; }
+.hero-grid { display: grid; grid-template-rows: repeat(3, minmax(72px, auto)); grid-auto-flow: column; grid-auto-columns: minmax(170px, 190px); gap: 9px; margin-top: 14px; padding: 2px 2px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-color: #488bff rgba(255, 255, 255, .08); scrollbar-width: thin; }
 .role-filters { display: flex; gap: 5px; margin-top: 14px; margin-bottom: 2px; }
 .role-filters button, .mode-filters button { padding: 7px 9px; border: 1px solid rgba(223, 231, 244, .12); color: #718097; background: transparent; cursor: pointer; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; }
 .role-filters button.active, .mode-filters button.active { border-color: #ef4b3f; color: #fff; background: rgba(239, 75, 63, .15); }
@@ -207,7 +207,8 @@ h1 span { color: #ef4b3f; }
   .phase-step:nth-child(n + 6) { display: none; }
   .draft-teams { grid-template-columns: 1fr; }
   .draft-side { min-height: 0; }
-  .hero-choice { flex-basis: 170px; min-width: 170px; }
+  .hero-grid { grid-auto-columns: 170px; }
+  .hero-choice { min-width: 0; }
   .map-room { padding-top: 24px; }
   .map-toolbar { display: block; }
   .map-actions { margin-top: 20px; }
