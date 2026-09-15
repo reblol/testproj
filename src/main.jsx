@@ -133,8 +133,8 @@ function DraftLanding() {
         </div>
         <div className="picker-panel">
           <div className="picker-heading"><div><span className="eyebrow">HERO POOL</span><strong>DRAG TO PLAN</strong></div><span className="phase-counter">{actions.length} / {phases.length}</span></div>
+          <div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div>
           <div className="hero-grid" onDragOver={(event) => event.preventDefault()} onDrop={removeHero}>
-            <div className="role-filters">{['All', 'Duelist', 'Strategist', 'Vanguard'].map((role) => <button className={roleFilter === role ? 'active' : ''} key={role} onClick={() => setRoleFilter(role)} type="button">{role}</button>)}</div>
             {visibleHeroes.map((hero) => <button className="hero-choice" draggable onDragStart={(event) => event.dataTransfer.setData('application/json', JSON.stringify({ heroId: hero.id }))} key={hero.id} type="button"><span className={`hero-token ${hero.tone}`}><img src={assetUrl('heroes', hero.asset)} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />{hero.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><span><b>{hero.name}</b><small>{hero.role}</small></span></button>)}
           </div>
           <div className="picker-hint">DRAG HEROES TO ANY BAN OR SAVE SLOT // DROP BACK HERE TO REMOVE</div>
